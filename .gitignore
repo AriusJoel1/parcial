@@ -1,0 +1,61 @@
+# Compilados Java
+*.class
+
+# Binarios Go
+worker_go
+bank_client_go
+
+# Archivos de datos de workers
+worker_*_data.json
+
+# Python
+*.pyc
+*.pyo
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos temporales del sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.*.swp
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Logs
+*.log
+
+# Archivos de respaldo
+*.bak
+*.backup
+*.tmp
+
+# Entornos virtuales Python
+venv/
+env/
+ENV/
+.venv
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Archivos de test
+*.test
+*.out
+
+# Build directories
+build/
+dist/
+target/

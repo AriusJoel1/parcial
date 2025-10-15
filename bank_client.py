@@ -44,6 +44,34 @@ def transfer(a, b, m):
     print(resp)
 
 
+def create_loan(account_id, amount):
+    """Crea un préstamo para una cuenta."""
+    msg = f"CREAR_PRESTAMO|{account_id}|{amount}|{amount}"
+    resp = send_and_recv(msg)
+    print(resp)
+
+
+def pay_loan(account_id, loan_id, amount):
+    """Paga una parte del préstamo."""
+    msg = f"PAGAR_PRESTAMO|{account_id}|{loan_id}|{amount}"
+    resp = send_and_recv(msg)
+    print(resp)
+
+
+def loan_status(account_id):
+    """Consulta el estado de préstamos de una cuenta."""
+    msg = f"ESTADO_PAGO_PRESTAMO|{account_id}"
+    resp = send_and_recv(msg)
+    print(resp)
+
+
+def arqueo():
+    """Realiza un arqueo total del sistema."""
+    msg = "ARQUEO"
+    resp = send_and_recv(msg)
+    print(resp)
+
+
 def stress_test(num_tx=100, max_acc=100, max_amt=100):
     """Realiza múltiples transferencias aleatorias concurrentes (modo stress test)."""
 
@@ -67,8 +95,8 @@ def stress_test(num_tx=100, max_acc=100, max_amt=100):
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2 and sys.argv[1] == "create":
-        # Por defecto crea 1000 cuentas con 100.0 cada una
-        create_accounts(1000, 100.0)
+        # Por defecto crea 10000 cuentas con 100.0 cada una
+        create_accounts(10000, 100.0)
 
     elif len(sys.argv) >= 2 and sys.argv[1] == "consult":
         if len(sys.argv) < 3:
@@ -90,8 +118,29 @@ if __name__ == "__main__":
 
     elif len(sys.argv) >= 2 and sys.argv[1] == "stress":
         num = int(sys.argv[2]) if len(sys.argv) > 2 else 200
-        maxacc = int(sys.argv[3]) if len(sys.argv) > 3 else 1000
+        maxacc = int(sys.argv[3]) if len(sys.argv) > 3 else 10000
         stress_test(num, maxacc, 50)
+
+    elif len(sys.argv) >= 2 and sys.argv[1] == "create_loan":
+        if len(sys.argv) < 4:
+            print("Uso: bank_client.py create_loan <account_id> <amount>")
+        else:
+            create_loan(sys.argv[2], float(sys.argv[3]))
+
+    elif len(sys.argv) >= 2 and sys.argv[1] == "pay_loan":
+        if len(sys.argv) < 5:
+            print("Uso: bank_client.py pay_loan <account_id> <loan_id> <amount>")
+        else:
+            pay_loan(sys.argv[2], int(sys.argv[3]), float(sys.argv[4]))
+
+    elif len(sys.argv) >= 2 and sys.argv[1] == "loan_status":
+        if len(sys.argv) < 3:
+            print("Uso: bank_client.py loan_status <account_id>")
+        else:
+            loan_status(sys.argv[2])
+
+    elif len(sys.argv) >= 2 and sys.argv[1] == "arqueo":
+        arqueo()
 
     else:
         print("Uso:")
@@ -99,3 +148,7 @@ if __name__ == "__main__":
         print("  bank_client.py consult <id>")
         print("  bank_client.py transfer <from> <to> <amt>")
         print("  bank_client.py stress [num_tx] [max_acc]")
+        print("  bank_client.py create_loan <account_id> <amount>")
+        print("  bank_client.py pay_loan <account_id> <loan_id> <amount>")
+        print("  bank_client.py loan_status <account_id>")
+        print("  bank_client.py arqueo")

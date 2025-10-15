@@ -119,7 +119,7 @@ public class CentralServer {
                         String resp = queryAccount(id);
                         out.println(resp);
 
-                    } else if (parts[0].equals("TRANSFERIR_CUENTA")) {           
+                    } else if (parts[0].equals("TRANSFERIR_CUENTA")) {
                         if (parts.length < 4) {
                             out.println("ERROR|FormatoInvalido");
                             continue;
@@ -129,24 +129,9 @@ public class CentralServer {
                         int to = Integer.parseInt(parts[2]);
                         double amt = Double.parseDouble(parts[3]);
 
-                        boolean okDebit = false, okCredit = false;
-
-                        // Replica a todos los workers para asegurar consistencia
-                        for (WorkerInfo w : workers) {
-                            try {
-                                String r1 = sendToWorker(w, "DEBIT|" + from + "|" + amt, 2000);
-                                if (r1 != null && r1.startsWith("OK")) okDebit = true;
-                                String r2 = sendToWorker(w, "CREDIT|" + to + "|" + amt, 2000);
-                                if (r2 != null && r2.startsWith("OK")) okCredit = true;
-                            } catch (Exception e) {
-                                System.err.println("Worker failed: " + e.getMessage());
-                            }
-                        }
-
-                        if (okDebit && okCredit)
-                            out.println("CONFIRMACION|Transferencia realizada");
-                        else
-                            out.println("ERROR|Transferencia fallida");
+                        // Usar la función de transferencia corregida
+                        String result = transfer(from, to, amt);
+                        out.println(result);
 
                     } else if (cmd.equals("ESTADO_PAGO_PRESTAMO")) {
                         int id = Integer.parseInt(parts[1]);
@@ -158,6 +143,32 @@ public class CentralServer {
                         WorkerInfo w = workers.get(idx);
                         String resp = sendToWorker(w, "ESTADO_PAGO_PRESTAMO|" + id, 5000);
                         out.println(resp);
+
+                    } else if (cmd.equals("CREAR_PRESTAMO")) {
+                        if (parts.length < 4) {
+                            out.println("ERROR|FormatoInvalido");
+                            continue;
+                        }
+                        int accountId = Integer.parseInt(parts[1]);
+                        double amount = Double.parseDouble(parts[2]);
+                        double pendingAmount = Double.parseDouble(parts[3]);
+                        String result = createLoan(accountId, amount, pendingAmount);
+                        out.println(result);
+
+                    } else if (cmd.equals("PAGAR_PRESTAMO")) {
+                        if (parts.length < 3) {
+                            out.println("ERROR|FormatoInvalido");
+                            continue;
+                        }
+                        int accountId = Integer.parseInt(parts[1]);
+                        int loanId = Integer.parseInt(parts[2]);
+                        double amount = Double.parseDouble(parts[3]);
+                        String result = payLoan(accountId, loanId, amount);
+                        out.println(result);
+
+                    } else if (cmd.equals("ARQUEO")) {
+                        String result = performArqueo();
+                        out.println(result);
 
                     } else {
                         out.println("ERROR|UnknownCommand");
@@ -228,6 +239,49 @@ public class CentralServer {
                 sendToWorker(wTo, "RECORD_TX|" + from + "|" + to + "|" + monto, 2000);
                 return "CONFIRMACION|Transferencia realizada";
             } catch (IOException e) {
+                return "ERROR|" + e.getMessage();
+            }
+        }
+
+        private String createLoan(int accountId, double amount, double pendingAmount) {
+            if (workers.size() == 0) return "ERROR|NoWorkers";
+            int idx = workerIndexForAccount(accountId);
+            WorkerInfo w = workers.get(idx);
+            try {
+                String resp = sendToWorker(w, "CREAR_PRESTAMO|" + accountId + "|" + amount + "|" + pendingAmount, 5000);
+                return resp != null ? resp : "ERROR|NoResponse";
+            } catch (IOException e) {
+                return "ERROR|" + e.getMessage();
+            }
+        }
+
+        private String payLoan(int accountId, int loanId, double amount) {
+            if (workers.size() == 0) return "ERROR|NoWorkers";
+            int idx = workerIndexForAccount(accountId);
+            WorkerInfo w = workers.get(idx);
+            try {
+                String resp = sendToWorker(w, "PAGAR_PRESTAMO|" + accountId + "|" + loanId + "|" + amount, 5000);
+                return resp != null ? resp : "ERROR|NoResponse";
+            } catch (IOException e) {
+                return "ERROR|" + e.getMessage();
+            }
+        }
+
+        private String performArqueo() {
+            if (workers.size() == 0) return "ERROR|NoWorkers";
+            double totalBalance = 0.0;
+            int totalAccounts = 0;
+            try {
+                for (WorkerInfo w : workers) {
+                    String resp = sendToWorker(w, "ARQUEO", 10000);
+                    if (resp != null && resp.startsWith("OK|")) {
+                        String[] data = resp.substring(3).split("\\|");
+                        totalBalance += Double.parseDouble(data[0]);
+                        totalAccounts += Integer.parseInt(data[1]);
+                    }
+                }
+                return "OK|TotalBalance:" + totalBalance + "|TotalAccounts:" + totalAccounts;
+            } catch (Exception e) {
                 return "ERROR|" + e.getMessage();
             }
         }
