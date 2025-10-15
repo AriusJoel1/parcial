@@ -1,4 +1,4 @@
-# Parcial CC4P1 - Java + Python (Simplified Distributed Bank & Chat Demo)
+# Parcial CC4P1 
 
 Contenido:
 - CentralServer.java         : Servidor central (Java)
