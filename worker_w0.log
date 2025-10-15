@@ -1,3 +1,0 @@
-Worker w0 connected to server localhost:9000
-Worker error: [WinError 10054] Se ha forzado la interrupción de una conexión existente por el host remoto
-Worker w0 disconnected normally, exiting.
