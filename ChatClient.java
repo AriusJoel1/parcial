@@ -38,22 +38,19 @@ public class ChatClient {
             JTabbedPane tabbedPane = new JTabbedPane();
 
             // Pestaña 1: Consultar Cuenta
-            tabbedPane.addTab("Consultar Cuenta", createConsultPanel());
+            tabbedPane.addTab("Consultar Saldo", createConsultPanel());
 
             // Pestaña 2: Transferencias
             tabbedPane.addTab("Transferencias", createTransferPanel());
 
-            // Pestaña 3: Préstamos
-            tabbedPane.addTab("Préstamos", createLoanPanel());
+            // Pestaña 3: Estado de Préstamos
+            tabbedPane.addTab("Mis Préstamos", createLoanStatusPanel());
 
-            // Pestaña 4: Pagar Préstamos
-            tabbedPane.addTab("Pagar Préstamos", createPayLoanPanel());
+            // Pestaña 4: Solicitar Préstamo
+            tabbedPane.addTab("Solicitar Préstamo", createLoanPanel());
 
-            // Pestaña 5: Estado de Préstamos
-            tabbedPane.addTab("Estado Préstamos", createLoanStatusPanel());
-
-            // Pestaña 6: Arqueo
-            tabbedPane.addTab("Arqueo del Sistema", createArqueoPanel());
+            // Pestaña 5: Pagar Préstamos
+            tabbedPane.addTab("Pagar Préstamo", createPayLoanPanel());
 
             // Layout principal
             frame.getContentPane().setLayout(new BorderLayout(10, 10));
@@ -300,36 +297,6 @@ public class ChatClient {
 
         gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 2;
         panel.add(btnStatus, gbc);
-
-        return panel;
-    }
-
-    // Panel para arqueo del sistema
-    private static JPanel createArqueoPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        JButton btnArqueo = new JButton("Realizar Arqueo del Sistema");
-        JLabel lblInfo = new JLabel("<html><i>El arqueo muestra el total de cuentas y la suma de todos los saldos</i></html>");
-
-        btnArqueo.addActionListener(e -> {
-            try {
-                out.println("ARQUEO");
-                String resp = in.readLine();
-                log("📈 Arqueo del Sistema:");
-                log("   " + resp);
-            } catch (Exception ex) {
-                log("❌ Error: " + ex.getMessage());
-            }
-        });
-
-        gbc.gridx = 0; gbc.gridy = 0;
-        panel.add(lblInfo, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 1;
-        panel.add(btnArqueo, gbc);
 
         return panel;
     }
